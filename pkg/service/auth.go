@@ -17,10 +17,6 @@ const (
 )
 
 func (s *Service) CreateUser(user domain.User) (int, error) {
-	if user.Username == "owner" {
-		return 1, nil
-	}
-
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
