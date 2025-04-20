@@ -8,7 +8,7 @@ package handler
 // )
 
 // const (
-// 	authorizationHeader = "Authorization"
+// 	authorizationHeader = "Service"
 // 	userCtx = "userId"
 // )
 
@@ -25,7 +25,7 @@ package handler
 // 		return
 // 	}
 
-// 	userId, err := h.services.Authorization.ParseToken(headerParts[1])
+// 	userId, err := h.services.Service.ParseToken(headerParts[1])
 // 	if err!=nil{
 // 		newErrorResponce(c, http.StatusUnauthorized, err.Error())
 // 		return

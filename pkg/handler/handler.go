@@ -1,16 +1,24 @@
 package handler
 
 import (
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/service"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
-	services *service.Service
+type Service interface {
+	CreateUser(user domain.User) (int, error)
+	GenerateToken(username, password string) (string, error)
+	ParseToken(accessToken string) (int, error)
+
+	List() ([]domain.Course, error)
 }
 
-func NewHandler(services *service.Service) *Handler{
-	return &Handler{services: services}
+type Handler struct {
+	service Service
+}
+
+func NewHandler(service Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
