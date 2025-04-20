@@ -1,22 +1,26 @@
 package service
 
 import (
-	"github.com/MyNameIsWhaaat/algo-learning"
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/repository"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 )
 
-type Authorization interface {
-	CreateUser(user algolearning.User) (int, error)
-	GenerateToken(username, password string) (string, error)
-	ParseToken(token string) (int, error)
+//type LayerService interface {
+//	CreateUser(user domain.User) (int, error)
+//	GenerateToken(username, password string) (string, error)
+//	ParseToken(token string) (int, error)
+//
+//	List() ([]domain.Course, error)
+//}
+
+type Repository interface {
+	CreateUser(user domain.User) (int, error)
+	GetUser(username, password string) (domain.User, error)
 }
 
 type Service struct {
-	Authorization
+	repo Repository
 }
 
-func NewService(repos *repository.Repository) *Service {
-	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
-	}
+func NewService(repo Repository) *Service {
+	return &Service{repo: repo}
 }
