@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MyNameIsWhaaat/algo-learning"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/repository"	
 	"github.com/dgrijalva/jwt-go"
 )
@@ -30,7 +30,7 @@ func NewAuthService(repo repository.Authorization) *AuthService{
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user algolearning.User) (int, error){
+func (s *AuthService) CreateUser(user domain.User) (int, error){
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
@@ -46,7 +46,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error){
 		ExpiresAt: time.Now().Add(tokenTTL).Unix(),
 		IssuedAt: time.Now().Unix(),
 		},
-		user.Id,
+		user.ID,
 	})
 
 	return token.SignedString([]byte(signingkey))

@@ -3,12 +3,12 @@ package handler
 import (
 	"net/http"
 
-	"github.com/MyNameIsWhaaat/algo-learning"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) signUp(c *gin.Context){
-	var input algolearning.User
+	var input domain.User
 
 	if err:= c.BindJSON(&input); err != nil{
 		newErrorResponce(c, http.StatusBadRequest, err.Error())

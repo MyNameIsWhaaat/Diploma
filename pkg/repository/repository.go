@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"github.com/MyNameIsWhaaat/algo-learning"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/jmoiron/sqlx"
 )
 
 type Authorization interface{
-	CreateUser(user algolearning.User) (int, error)
-	GetUser(username, password string) (algolearning.User, error)
+	CreateUser(user domain.User) (int, error)
+	GetUser(username, password string) (domain.User, error)
 }
 
 type Repository struct{
