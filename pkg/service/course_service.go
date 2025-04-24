@@ -13,6 +13,10 @@ func NewCourseService(repo repository.Course) *CourseService {
 	return &CourseService{repo: repo}
 }
 
-func (s *CourseService) GetAll() ([]models.CourseWithProgress, error) {
-	return s.repo.GetAll()
+func (s *CourseService) GetCourseWithProgress(userId int) ([]models.CourseWithProgress, error) {
+	return s.repo.GetCourseWithProgress(userId)
+}
+
+func (s *CourseService) GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error) {
+	return s.repo.GetCourseWithoutProgress(userId)
 }

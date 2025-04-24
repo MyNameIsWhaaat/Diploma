@@ -12,8 +12,23 @@ type getAllCoursesResponse struct {
 	Data []models.CourseWithProgress `json:"data"`
 }
 
-func (h *Handler) getAllCourses(c *gin.Context) {
-	courses, err := h.services.Course.GetAll()
+func (h *Handler) getAllCourseWithProgress(c *gin.Context) {
+	userId, err := getUserId(c)
+	courses, err := h.services.Course.GetCourseWithProgress(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		logrus.Errorf("failed to get courses: %s", err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, getAllCoursesResponse{
+		Data: courses,
+	})
+}
+
+func (h *Handler) getAllCourseWithoutProgress(c *gin.Context) {
+	userId, err := getUserId(c)
+	courses, err := h.services.Course.GetCourseWithoutProgress(userId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		logrus.Errorf("failed to get courses: %s", err.Error())

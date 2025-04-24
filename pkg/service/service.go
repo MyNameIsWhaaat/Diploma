@@ -13,7 +13,8 @@ type Authorization interface {
 }
 
 type Course interface {
-	GetAll() ([]models.CourseWithProgress, error)
+	GetCourseWithProgress(userId int) ([]models.CourseWithProgress, error)
+	GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error)
 }
 
 type Service struct {
