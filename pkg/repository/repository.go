@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -10,13 +11,18 @@ type Authorization interface{
 	GetUser(username, password string) (domain.User, error)
 }
 
+type Course interface {
+	GetAll() ([]models.CourseWithProgress, error)
+}
+
 type Repository struct{
 	Authorization
-	
+	Course 
 }
 
 func NewRepository(db *sqlx.DB)  *Repository{
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
+		Course: NewCoursePostgres(db),
 	}
 }
