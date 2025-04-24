@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -62,4 +64,28 @@ func (r *CoursePostgres) GetCourseWithoutProgress(userId int) ([]models.CourseWi
 	}
 
 	return courses, nil
+}
+
+func (r *CoursePostgres) StartCourse(userID, courseID int) error {
+	// Проверка: уже есть?
+	var exists bool
+	err := r.db.Get(&exists, `
+		SELECT EXISTS (
+			SELECT 1 FROM user_courses WHERE user_id = $1 AND course_id = $2
+		)
+	`, userID, courseID)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("курс уже начат")
+	}
+
+	// Вставка
+	_, err = r.db.Exec(`
+		INSERT INTO user_courses (user_id, course_id, xp_earned, completed)
+		VALUES ($1, $2, 0, false)
+	`, userID, courseID)
+
+	return err
 }

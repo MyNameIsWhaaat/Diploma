@@ -20,3 +20,7 @@ func (s *CourseService) GetCourseWithProgress(userId int) ([]models.CourseWithPr
 func (s *CourseService) GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error) {
 	return s.repo.GetCourseWithoutProgress(userId)
 }
+
+func (s *CourseService) StartCourse(userID, courseID int) error {
+	return s.repo.StartCourse(userID, courseID)
+}

@@ -14,6 +14,7 @@ type Authorization interface{
 type Course interface {
 	GetCourseWithProgress(userId int) ([]models.CourseWithProgress, error)
 	GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error)
+	StartCourse(userID, courseID int) error
 }
 
 type Repository struct{
