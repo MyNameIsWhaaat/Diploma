@@ -29,6 +29,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			courses.GET("/with-progress", h.getAllCourseWithProgress)
 			courses.GET("/without-progress", h.getAllCourseWithoutProgress)
 			courses.POST("/:id/start", h.startCourse)
+
+			levels:= courses.Group("/:id/levels")
+			{
+				levels.GET("", h.getCourseLevels)
+			}
 		}
 		
 	}

@@ -18,14 +18,20 @@ type Course interface {
 	StartCourse(userID, courseID int) error
 }
 
+type Level interface {
+	GetByCourse(courseID int) ([]models.Level, error)
+}
+
 type Service struct {
 	Authorization
 	Course
+	Level
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		Course:        NewCourseService(repos.Course),
+		Level:         NewLevelService(repos.Level, repos.Course),
 	}
 }
