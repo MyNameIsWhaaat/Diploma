@@ -75,11 +75,11 @@ func (r *LevelPostgres) CompleteLevel(userID, levelID int) error {
 		return err
 	}
 
-	// Обновляем общий XP пользователя в profile_levels
-	var totalXP, xpToNextLevel int
+	// Получаем текущий уровень и опыт пользователя
+	var profileLevelID, totalXP int
 	err = tx.QueryRow(`
-		SELECT total_xp, xp_to_next_level FROM user_profile_levels WHERE user_id = $1
-	`, userID).Scan(&totalXP, &xpToNextLevel)
+		SELECT profile_level_id, total_xp FROM user_profile_levels WHERE user_id = $1
+	`, userID).Scan(&profileLevelID, &totalXP)
 	if err != nil {
 		return err
 	}
@@ -87,15 +87,23 @@ func (r *LevelPostgres) CompleteLevel(userID, levelID int) error {
 	// Прибавляем полученный опыт
 	newTotalXP := totalXP + xpReward
 
+	// Получаем минимальный и максимальный опыт для текущего уровня
+	var minXP, maxXP int
+	err = tx.QueryRow(`
+		SELECT min_xp, max_xp FROM profile_levels WHERE id = $1
+	`, profileLevelID).Scan(&minXP, &maxXP)
+	if err != nil {
+		return err
+	}
+
 	// Проверяем, апнулся ли уровень
-	if newTotalXP >= xpToNextLevel {
-		// Повышаем уровень
+	if newTotalXP >= maxXP {
+		// Повышаем уровень пользователя
 		_, err = tx.Exec(`
 			UPDATE user_profile_levels
 			SET 
-				profile_level_id = profile_level_id + 1,  -- Увеличиваем ID уровня
+				profile_level_id = profile_level_id + 1,  -- Увеличиваем уровень
 				total_xp = $1,
-				xp_to_next_level = xp_to_next_level * 2, -- Увеличиваем XP для следующего уровня
 				last_level_up = NOW(),
 				updated_at = NOW()
 			WHERE user_id = $2
