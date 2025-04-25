@@ -93,14 +93,47 @@ CREATE TABLE progress (
     UNIQUE (user_id, task_id)
 );
 
-CREATE TABLE user_profile_levels (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    current_level INTEGER DEFAULT 1,               -- Уровень пользователя в системе
-    total_xp INTEGER DEFAULT 0,                    -- Общий набранный опыт
-    xp_to_next_level INTEGER DEFAULT 100,          -- Сколько XP нужно до следующего уровня
-    title VARCHAR(100),                            -- Название уровня: “Новичок”, “Гуру”, и т.д.
-    last_level_up TIMESTAMP,                       -- Когда последний раз повышался уровень
-    created_at TIMESTAMP DEFAULT now(),
-    updated_at TIMESTAMP DEFAULT now()
+CREATE TABLE profile_levels (
+	id SERIAL PRIMARY KEY,
+	title VARCHAR(255) NOT NULL,
+	min_xp INT NOT NULL,
+	max_xp INT NOT NULL
 );
+
+CREATE TABLE user_profile_levels (
+	id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	profile_level_id INT NOT NULL REFERENCES profile_levels(id),
+	total_xp INT NOT NULL DEFAULT 0,
+	last_level_up TIMESTAMP,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+
+
+INSERT INTO profile_levels (title, min_xp, max_xp) VALUES
+('Новичок', 0, 99),
+('Ученик', 100, 299),
+('Профессионал', 300, 599),
+('Мастер', 600, 999),
+('Гуру', 1000, 1999),
+('Легенда', 2000, 999999);
+
+INSERT INTO courses (title, short_description, full_description, image_url, difficulty, xp_reward, is_active)
+VALUES
+('Алгоритмы для начинающих', 'Базовые алгоритмы', 'Описание полного курса по базовым алгоритмам', 'https://example.com/img1.png', 'beginner', 100, true),
+('Структуры данных', 'Массивы, списки и деревья', 'Углублённое изучение структур данных', 'https://example.com/img2.png', 'intermediate', 150, true),
+('Графы и динамика', 'Алгоритмы на графах и динамическое программирование', 'Курс по продвинутым алгоритмам', 'https://example.com/img3.png', 'advanced', 200, true);
+
+INSERT INTO levels (course_id, title, description, order_index, xp_reward)
+VALUES
+(1, 'Введение в алгоритмы', 'Базовые понятия и зачем всё это нужно', 1, 10),
+(1, 'Сложность алгоритмов', 'Что такое Big O и как её считать', 2, 15),
+(1, 'Поиск и сортировка', 'Простейшие алгоритмы поиска и сортировки', 3, 20);
+
+INSERT INTO levels (course_id, title, description, order_index, xp_reward)
+VALUES
+(2, 'Массивы и списки', 'Изучаем динамические и статические структуры', 1, 15),
+(2, 'Стеки и очереди', 'ФИФО и ЛИФО в жизни и коде', 2, 20),
+(2, 'Деревья и графы', 'Первые шаги в сложные структуры', 3, 25);

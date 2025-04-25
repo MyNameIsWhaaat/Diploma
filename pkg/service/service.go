@@ -20,6 +20,7 @@ type Course interface {
 
 type Level interface {
 	GetByCourse(courseID int) ([]models.Level, error)
+	CompleteLevel(userID, levelID int) error
 }
 
 type Service struct {

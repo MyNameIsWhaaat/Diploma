@@ -15,15 +15,23 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 }
 
 func (r *AuthPostgres) CreateUser(user domain.User) (int, error){
-	var id int
-	query := fmt.Sprintf("INSERT INTO %s (name, username, password_hash) values ($1, $2, $3) RETURNING id", usersTable)
+		var userID int
+		query := fmt.Sprintf("INSERT INTO %s (name, username, password_hash) values ($1, $2, $3) RETURNING id", usersTable)
+		row := r.db.QueryRow(query, user.Name, user.Username, user.Password)
+		if err := row.Scan(&userID); err != nil {
+			return 0, err
+		}
+//Создаем запись в таблице с уровнями пользователей
+		profileLevelID := 1
+		_, err := r.db.Exec(`
+			INSERT INTO user_profile_levels (user_id, profile_level_id, total_xp, last_level_up)
+			VALUES ($1, $2, 0, NOW())
+		`, userID, profileLevelID)
+		if err != nil {
+			return 0, err
+		}
 	
-	row:= r.db.QueryRow(query, user.Name, user.Username, user.Password)
-	if err:= row.Scan(&id); err!=nil{
-		return 0, err
-	}
-
-	return id, nil
+		return userID, nil
 }
 
 func (r *AuthPostgres) GetUser(username, password string) (domain.User, error){

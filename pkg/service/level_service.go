@@ -21,3 +21,7 @@ func (s *LevelService) GetByCourse(courseID int) ([]models.Level, error) {
 	// можем проверять: существует ли курс
 	return s.repo.GetByCourse(courseID)
 }
+
+func (s *LevelService) CompleteLevel(userID, levelID int) error {
+	return s.repo.CompleteLevel(userID, levelID)
+}

@@ -33,6 +33,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			levels:= courses.Group("/:id/levels")
 			{
 				levels.GET("", h.getCourseLevels)
+				levels.POST("/:id/complete", h.completeLevel)
 			}
 		}
 		
