@@ -4,18 +4,9 @@ import (
 	"fmt"
 
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
-	"github.com/jmoiron/sqlx"
 )
 
-type LevelPostgres struct {
-	db *sqlx.DB
-}
-
-func NewLevelPostgres(db *sqlx.DB) *LevelPostgres {
-	return &LevelPostgres{db: db}
-}
-
-func (r *LevelPostgres) GetByCourse(courseID int) ([]models.Level, error) {
+func (r *Repository) GetByCourse(courseID int) ([]models.Level, error) {
 	query := `
 		SELECT id, course_id, title, description, order_index, xp_reward
 		FROM levels
@@ -27,7 +18,7 @@ func (r *LevelPostgres) GetByCourse(courseID int) ([]models.Level, error) {
 	return levels, err
 }
 
-func (r *LevelPostgres) CompleteLevel(userID, levelID int) error {
+func (r *Repository) CompleteLevel(userID, levelID int) error {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		return err

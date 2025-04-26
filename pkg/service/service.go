@@ -3,36 +3,29 @@ package service
 import (
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/repository"
 )
 
-type Authorization interface {
+type RepoInterface interface {
 	CreateUser(user domain.User) (int, error)
+	GetUser(username, password string) (domain.User, error)
+
 	GenerateToken(username, password string) (string, error)
 	ParseToken(token string) (int, error)
-}
 
-type Course interface {
 	GetCourseWithProgress(userId int) ([]models.CourseWithProgress, error)
 	GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error)
 	StartCourse(userID, courseID int) error
-}
 
-type Level interface {
 	GetByCourse(courseID int) ([]models.Level, error)
 	CompleteLevel(userID, levelID int) error
 }
 
 type Service struct {
-	Authorization
-	Course
-	Level
+	repo RepoInterface
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repo RepoInterface) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
-		Course:        NewCourseService(repos.Course),
-		Level:         NewLevelService(repos.Level, repos.Course),
+		repo: repo,
 	}
 }
