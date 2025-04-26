@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: course_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: course-db
+    ports:
+      - "5436:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+    # `healthcheck` — это способ сказать Docker'у:
+    #  Проверь, что сервис (например, база данных) действительно готов к работе, а не просто "процесс запущен".
+    #
+    # Проверка происходит по заданному скрипту (`pg_isready -U postgres` в нашем случае), где postgres -> роль (POSTGRES_USER)
+    # Если проверка успешная, контейнер помечается как `healthy`.
+    # Если проверка неуспешная (например, роль `user` не найдена) — контейнер остаётся в состоянии `unhealthy`, это если бы мы указали ["CMD-SHELL", "pg_isready -U user"],
+    # где роль user не существует
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate:v4.15.2
+    container_name: migrate_runner
+
+    # А вот это значит, что не стартуй этот сервис (`migrate` - наш контейнер миграций), пока сервис `db` (контейнер с БД) не станет "healthy"!.
+    # Т.е. migrate-контейнер будет ждать, пока БД полностью готова!
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # вот это означает "монтирование директории" из твоей локальной машины в контейнер Docker.
+    # `./schema` — это локальная директория на твоём ПК, относительно директории, где находится файл `docker-compose.yml`.
+    # Например, если твой проект находится в `/home/user/myproject`, то это будет путь `/home/user/myproject/schema`.
+
+    # `/migrations` — это путь внутри контейнера.
+    # Когда контейнер запускается, Docker создаст ссылку на этот путь, и всё содержимое локальной директории `./schema` будет доступно в контейнере по пути `/migrations`.
+
+    # Зачем это нужно:
+    # Это позволяет контейнеру, например, миграциям, иметь доступ к локальной директории с файлами миграций.
+    # Ты можешь редактировать миграции на своём компьютере, и они автоматически будут доступны внутри контейнера.
+    # В твоём случае миграции из папки `./schema` будут доступны в контейнере `migrate` по пути `/migrations`, откуда они и накатываются в базу данных.
+
+    # Т.е. Когда ты запускаешь контейнер, все файлы из `./schema` будут доступны внутри контейнера по пути `/migrations`.
+    volumes:
+      - ./schema:/migrations
+    entrypoint: >
+      /bin/sh -c "
+        migrate -path /migrations -database postgres://postgres:qwerty@db:5432/course-db?sslmode=disable up || \
+        if [ $? -eq 1 ]; then
+          echo 'No migrations to apply.';
+        else
+          exit 1;
+        fi
+      "
+volumes:
+  db_data:
