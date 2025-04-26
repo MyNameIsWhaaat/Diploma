@@ -4,19 +4,10 @@ import (
 	"fmt"
 
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
-	"github.com/jmoiron/sqlx"
 )
 
-type AuthPostgres struct {
-	db *sqlx.DB
-}
-
-func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
-	return &AuthPostgres{db: db}
-}
-
 // CreateUser создает пользователя, возвращает его идентификатор.
-func (r *AuthPostgres) CreateUser(user domain.User) (int, error) {
+func (r *Repository) CreateUser(user domain.User) (int, error) {
 	const query = `INSERT INTO users (name, username, password_hash) values ($1, $2, $3) RETURNING id`
 
 	row := r.db.QueryRow(query, user.Name, user.Username, user.Password)
@@ -39,7 +30,7 @@ func (r *AuthPostgres) CreateUser(user domain.User) (int, error) {
 	return userID, nil
 }
 
-func (r *AuthPostgres) GetUser(username, password string) (domain.User, error) {
+func (r *Repository) GetUser(username, password string) (domain.User, error) {
 	var user domain.User
 	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", usersTable)
 	err := r.db.Get(&user, query, username, password)
