@@ -14,7 +14,7 @@ func (h *Handler) getCourseLevels(c *gin.Context) {
 		return
 	}
 
-	levels, err := h.services.Level.GetByCourse(courseId)
+	levels, err := h.services.GetByCourse(courseId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -36,7 +36,7 @@ func (h *Handler) completeLevel(c *gin.Context) {
 		return
 	}
 
-	err = h.services.Level.CompleteLevel(userId, levelId)
+	err = h.services.CompleteLevel(userId, levelId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

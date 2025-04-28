@@ -15,7 +15,7 @@ type getAllCoursesResponse struct {
 
 func (h *Handler) getAllCourseWithProgress(c *gin.Context) {
 	userId, err := getUserId(c)
-	courses, err := h.services.Course.GetCourseWithProgress(userId)
+	courses, err := h.services.GetCourseWithProgress(userId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		logrus.Errorf("failed to get courses: %s", err.Error())
@@ -29,7 +29,7 @@ func (h *Handler) getAllCourseWithProgress(c *gin.Context) {
 
 func (h *Handler) getAllCourseWithoutProgress(c *gin.Context) {
 	userId, err := getUserId(c)
-	courses, err := h.services.Course.GetCourseWithoutProgress(userId)
+	courses, err := h.services.GetCourseWithoutProgress(userId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		logrus.Errorf("failed to get courses: %s", err.Error())
@@ -54,7 +54,7 @@ func (h *Handler) startCourse(c *gin.Context) {
 		return
 	}
 
-	err = h.services.Course.StartCourse(userId, courseId)
+	err = h.services.StartCourse(userId, courseId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

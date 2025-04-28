@@ -3,19 +3,10 @@ package repository
 import (
 	"fmt"
 
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
-	"github.com/jmoiron/sqlx"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain" 
 )
 
-type CoursePostgres struct {
-	db *sqlx.DB
-}
-
-func NewCoursePostgres(db *sqlx.DB) *CoursePostgres {
-	return &CoursePostgres{db: db}
-}
-
-func (r *CoursePostgres) GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error) {
+func (r *Repository) GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error) {
 	query := `
 		SELECT
 			c.id,
@@ -40,7 +31,7 @@ func (r *CoursePostgres) GetCourseWithProgress(userId int) ([]domain.CourseWithP
 	return courses, nil
 }
 
-func (r *CoursePostgres) GetCourseWithoutProgress(userId int) ([]domain.CourseWithProgress, error) {
+func (r *Repository) GetCourseWithoutProgress(userId int) ([]domain.CourseWithProgress, error) {
 	query := `
 		SELECT
 			c.id,
@@ -66,7 +57,7 @@ func (r *CoursePostgres) GetCourseWithoutProgress(userId int) ([]domain.CourseWi
 	return courses, nil
 }
 
-func (r *CoursePostgres) StartCourse(userID, courseID int) error {
+func (r *Repository) StartCourse(userID, courseID int) error {
 	// Проверка: уже есть?
 	var exists bool
 	err := r.db.Get(&exists, `
