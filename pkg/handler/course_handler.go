@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 type getAllCoursesResponse struct {
-	Data []models.CourseWithProgress `json:"data"`
+	Data []domain.CourseWithProgress `json:"data"`
 }
 
 func (h *Handler) getAllCourseWithProgress(c *gin.Context) {

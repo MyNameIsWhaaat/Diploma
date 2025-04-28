@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/repository"
 )
 
@@ -13,13 +12,13 @@ type Authorization interface {
 }
 
 type Course interface {
-	GetCourseWithProgress(userId int) ([]models.CourseWithProgress, error)
-	GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error)
+	GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error)
+	GetCourseWithoutProgress(userId int) ([]domain.CourseWithProgress, error)
 	StartCourse(userID, courseID int) error
 }
 
 type Level interface {
-	GetByCourse(courseID int) ([]models.Level, error)
+	GetByCourse(courseID int) ([]domain.LevelFromCourse, error)
 	CompleteLevel(userID, levelID int) error
 }
 

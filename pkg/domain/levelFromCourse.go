@@ -1,6 +1,6 @@
-package models
+package domain
 
-type Level struct {
+type LevelFromCourse struct {
 	ID          int     `db:"id" json:"id"`
 	CourseID    int     `db:"course_id" json:"-"`
 	Title       string  `db:"title" json:"title"`

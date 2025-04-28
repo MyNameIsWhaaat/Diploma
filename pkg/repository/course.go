@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -15,7 +15,7 @@ func NewCoursePostgres(db *sqlx.DB) *CoursePostgres {
 	return &CoursePostgres{db: db}
 }
 
-func (r *CoursePostgres) GetCourseWithProgress(userId int) ([]models.CourseWithProgress, error) {
+func (r *CoursePostgres) GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error) {
 	query := `
 		SELECT
 			c.id,
@@ -31,7 +31,7 @@ func (r *CoursePostgres) GetCourseWithProgress(userId int) ([]models.CourseWithP
 		ORDER BY c.id;
 	`
 
-	var courses []models.CourseWithProgress
+	var courses []domain.CourseWithProgress
 	err := r.db.Select(&courses, query, userId)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (r *CoursePostgres) GetCourseWithProgress(userId int) ([]models.CourseWithP
 	return courses, nil
 }
 
-func (r *CoursePostgres) GetCourseWithoutProgress(userId int) ([]models.CourseWithProgress, error) {
+func (r *CoursePostgres) GetCourseWithoutProgress(userId int) ([]domain.CourseWithProgress, error) {
 	query := `
 		SELECT
 			c.id,
@@ -57,7 +57,7 @@ func (r *CoursePostgres) GetCourseWithoutProgress(userId int) ([]models.CourseWi
 		ORDER BY c.id;
 	`
 
-	var courses []models.CourseWithProgress
+	var courses []domain.CourseWithProgress
 	err := r.db.Select(&courses, query, userId)
 	if err != nil {
 		return nil, err

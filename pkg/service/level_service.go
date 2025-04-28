@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/MyNameIsWhaaat/algo-learning/pkg/models"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/repository"
 )
 
@@ -17,7 +17,7 @@ func NewLevelService(repo repository.Level, courseRepo repository.Course) *Level
 	}
 }
 
-func (s *LevelService) GetByCourse(courseID int) ([]models.Level, error) {
+func (s *LevelService) GetByCourse(courseID int) ([]domain.LevelFromCourse, error) {
 	// можем проверять: существует ли курс
 	return s.repo.GetByCourse(courseID)
 }

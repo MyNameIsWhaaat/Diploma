@@ -1,4 +1,4 @@
-package models
+package domain
 
 type CourseWithProgress struct {
 	ID               int     `db:"id" json:"id"`
