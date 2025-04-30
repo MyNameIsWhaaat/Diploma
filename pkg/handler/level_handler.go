@@ -24,23 +24,29 @@ func (h *Handler) getCourseLevels(c *gin.Context) {
 }
 
 func (h *Handler) completeLevel(c *gin.Context) {
+	// Получение ID пользователя из контекста
 	userId, err := getUserId(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
-	levelId, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	// Получение и валидация ID уровня из параметра URL
+	levelIdParam := c.Param("id")
+	levelId, err := strconv.Atoi(levelIdParam)
+	if err != nil || levelId <= 0 {
 		newErrorResponse(c, http.StatusBadRequest, "invalid level id")
 		return
 	}
 
+	// Попытка завершить уровень
 	err = h.services.CompleteLevel(userId, levelId)
 	if err != nil {
+		// Обработка ошибок бизнес-логики (например, уровень не найден, уже завершён, не принадлежит пользователю и т.п.)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	// Успешный ответ
 	c.JSON(http.StatusOK, statusResponse{Status: "OK"})
 }
