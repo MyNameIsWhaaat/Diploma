@@ -11,6 +11,6 @@ type Progress struct {
 	Attempts    int        `db:"attempts"`
 	XPEarned    int        `db:"xp_earned"`
 	TimeSpent   *int       `db:"time_spent"` // в секундах
-	CompletedAt *time.Time `db:"completed_at"`
+	CompletedAt time.Time `db:"completed_at"`
 	NeedsReview bool       `db:"needs_review"`
 }

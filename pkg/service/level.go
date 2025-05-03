@@ -7,7 +7,3 @@ import (
 func (s *Service) GetByCourse(courseID int) ([]domain.LevelFromCourse, error) {
 	return s.repo.GetByCourse(courseID)
 }
-
-func (s *Service) CompleteLevel(userID, levelID int) error {
-	return s.repo.CompleteLevel(userID, levelID)
-}
