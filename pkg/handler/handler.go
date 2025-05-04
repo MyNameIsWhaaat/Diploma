@@ -28,13 +28,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			courses.GET("/with-progress", h.getAllCourseWithProgress)
 			courses.GET("/without-progress", h.getAllCourseWithoutProgress)
-			courses.POST("/:id/start", h.startCourse)
+			courses.POST("/start/:id", h.startCourse)
 
 			levels := courses.Group("/:course_id/levels")
 			{
 				levels.GET("", h.getCourseLevels)
 			}
-			courses.POST("/levels/:id/complete", h.completeLevel)
+			courses.POST("/complete/level/:id", h.completeLevel)
 		}
 		
 	}

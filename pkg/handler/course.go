@@ -9,8 +9,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type getAllCoursesResponse struct {
+type getCoursesWithProgressResponse struct {
 	Data []domain.CourseWithProgress `json:"data"`
+}
+
+type getCoursesWithoutProgressResponse struct {
+	Data []domain.CourseWithoutProgress `json:"data"`
 }
 
 func (h *Handler) getAllCourseWithProgress(c *gin.Context) {
@@ -22,7 +26,7 @@ func (h *Handler) getAllCourseWithProgress(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, getAllCoursesResponse{
+	c.JSON(http.StatusOK, getCoursesWithProgressResponse{
 		Data: courses,
 	})
 }
@@ -36,7 +40,7 @@ func (h *Handler) getAllCourseWithoutProgress(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, getAllCoursesResponse{
+	c.JSON(http.StatusOK, getCoursesWithoutProgressResponse{
 		Data: courses,
 	})
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func (h *Handler) getCourseLevels(c *gin.Context) {
-	courseId, err := strconv.Atoi(c.Param("id"))
+	courseId, err := strconv.Atoi(c.Param("course_id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid course id")
 		return

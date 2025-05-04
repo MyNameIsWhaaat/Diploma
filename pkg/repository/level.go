@@ -86,105 +86,63 @@ func (r *Repository) GetUserProfileLevelData(tx *sqlx.Tx, userID int) (int, int,
 	return profileLevelID, totalXP, err
 }
 
-func (r *Repository) UpdateUserProfileLevel(tx *sqlx.Tx, userID, profileLevelID, newTotalXP int) error {
-	var minXP, maxXP int
-	err := tx.QueryRow(`
+// Получить границы текущего уровня
+func (r *Repository) GetProfileXPBounds(tx *sqlx.Tx, profileLevelID int) (minXP, maxXP int, err error) {
+	err = tx.QueryRow(`
 		SELECT min_xp, max_xp FROM profile_levels WHERE id = $1
 	`, profileLevelID).Scan(&minXP, &maxXP)
-	if err != nil {
-		return err
-	}
+	return
+}
 
-	if newTotalXP >= maxXP {
-		_, err = tx.Exec(`
-			UPDATE user_profile_levels
-			SET profile_level_id = profile_level_id + 1,
-				total_xp = $1,
-				last_level_up = NOW(),
-				updated_at = NOW()
-			WHERE user_id = $2
-		`, newTotalXP, userID)
-	} else {
-		_, err = tx.Exec(`
-			UPDATE user_profile_levels
-			SET total_xp = $1,
-				updated_at = NOW()
-			WHERE user_id = $2
-		`, newTotalXP, userID)
-	}
+// Обновить только XP (без апа уровня)
+func (r *Repository) UpdateUserTotalXP(tx *sqlx.Tx, userID int, totalXP int) error {
+	_, err := tx.Exec(`
+		UPDATE user_profile_levels
+		SET total_xp = $1,
+			updated_at = NOW()
+		WHERE user_id = $2
+	`, totalXP, userID)
 	return err
 }
 
-// // Основной метод для завершения уровня
-// func (r *Repository) CompleteLevel(userID, levelID int) error {
-// 	tx, err := r.db.Beginx()
+// Апнуть уровень и обновить XP
+func (r *Repository) LevelUpUser(tx *sqlx.Tx, userID int, newTotalXP int) error {
+	_, err := tx.Exec(`
+		UPDATE user_profile_levels
+		SET profile_level_id = profile_level_id + 1,
+			total_xp = $1,
+			last_level_up = NOW(),
+			updated_at = NOW()
+		WHERE user_id = $2
+	`, newTotalXP, userID)
+	return err
+}
+
+// func (r *Repository) UpdateUserProfileLevel(tx *sqlx.Tx, userID, profileLevelID, newTotalXP int) error {
+// 	var minXP, maxXP int
+// 	err := tx.QueryRow(`
+// 		SELECT min_xp, max_xp FROM profile_levels WHERE id = $1
+// 	`, profileLevelID).Scan(&minXP, &maxXP)
 // 	if err != nil {
 // 		return err
 // 	}
 
-// 	defer func() {
-// 		if err != nil {
-// 			tx.Rollback()
-// 		} else {
-// 			tx.Commit()
-// 		}
-// 	}()
-
-// 	// Получаем данные уровня
-// 	courseID, xpReward, err := r.GetCourseIDAndXpReward(levelID)
-// 	if err != nil {
-// 		return fmt.Errorf("уровень не найден или удалён")
+// 	if newTotalXP >= maxXP {
+// 		_, err = tx.Exec(`
+// 			UPDATE user_profile_levels
+// 			SET profile_level_id = profile_level_id + 1,
+// 				total_xp = $1,
+// 				last_level_up = NOW(),
+// 				updated_at = NOW()
+// 			WHERE user_id = $2
+// 		`, newTotalXP, userID)
+// 	} else {
+// 		_, err = tx.Exec(`
+// 			UPDATE user_profile_levels
+// 			SET total_xp = $1,
+// 				updated_at = NOW()
+// 			WHERE user_id = $2
+// 		`, newTotalXP, userID)
 // 	}
-
-// 	//пользователь должен быть записан на курс
-// 	var exists bool
-// 	err = tx.QueryRow(`
-// 	SELECT EXISTS(
-// 		SELECT 1 FROM user_courses
-// 		WHERE user_id = $1 AND course_id = $2
-// 	)
-// `, userID, courseID).Scan(&exists)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if !exists {
-// 		return fmt.Errorf("вы не записаны на курс, содержащий этот уровень")
-// 	}
-
-// 	// Проверяем, завершён ли уже
-// 	var completed bool
-// 	err = tx.QueryRow(`
-// 		SELECT completed FROM user_levels
-// 		WHERE user_id = $1 AND level_id = $2
-// 	`, userID, levelID).Scan(&completed)
-// 	if err != nil && err != sql.ErrNoRows {
-// 		return err
-// 	}
-// 	if completed {
-// 		return fmt.Errorf("вы уже завершили этот уровень")
-// 	}
-
-// 	// Помечаем уровень как завершённый
-// 	err = r.MarkLevelAsCompleted(tx, userID, levelID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// Обновляем XP в курсе
-// 	err = r.UpdateXPInCourse(tx, userID, courseID, xpReward)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// Получаем профиль пользователя
-// 	profileLevelID, totalXP, err := r.getUserProfileLevelData(tx, userID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// Проверяем на повышение уровня
-// 	newTotalXP := totalXP + xpReward
-// 	err = r.levelUp(tx, userID, profileLevelID, newTotalXP)
-
 // 	return err
 // }

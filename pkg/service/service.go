@@ -10,11 +10,10 @@ type RepoInterface interface {
 	GetUser(username, password string) (domain.User, error)
 
 	GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error)
-	GetCourseWithoutProgress(userId int) ([]domain.CourseWithProgress, error)
+	GetCourseWithoutProgress(userId int) ([]domain.CourseWithoutProgress, error)
 	StartCourse(userID, courseID int) error
 
 	GetByCourse(courseID int) ([]domain.LevelFromCourse, error)
-	CompleteLevel(userID, levelID int) error
 
 	GetCourseIDAndXpReward(levelID int) (int, int, error)
 	BeginTx() (*sqlx.Tx, error)
@@ -23,7 +22,11 @@ type RepoInterface interface {
 	MarkLevelAsCompleted(tx *sqlx.Tx, userID, levelID int) error
 	UpdateXPInCourse(tx *sqlx.Tx, userID, courseID, xpReward int) error
 	GetUserProfileLevelData(tx *sqlx.Tx, userID int) (int, int, error)
-	UpdateUserProfileLevel(tx *sqlx.Tx, userID, profileLevelID, newTotalXP int) error
+	GetProfileXPBounds(tx *sqlx.Tx, profileLevelID int) (minXP, maxXP int, err error)
+	UpdateUserTotalXP(tx *sqlx.Tx, userID int, totalXP int) error
+	LevelUpUser(tx *sqlx.Tx, userID int, newTotalXP int) error
+	// UpdateUserProfileLevel(tx *sqlx.Tx, userID, profileLevelID, newTotalXP int) error
+
 }
 
 type Service struct {

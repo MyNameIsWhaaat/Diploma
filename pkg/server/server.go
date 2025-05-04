@@ -1,4 +1,4 @@
-package algolearning
+package server
 
 import (
 	"context"

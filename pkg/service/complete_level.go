@@ -7,6 +7,10 @@ import (
 
 func (s *Service) CompleteLevel(userID, levelID int) error {
 
+	if userID <= 0 {
+		return fmt.Errorf("invalid user ID: %d", userID)
+	}
+
 	tx, err := s.repo.BeginTx()
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
@@ -67,10 +71,19 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 	// Считаем новое общее количество XP
 	newTotalXP := totalXP + xpReward
 
-	// Проверяем на повышение уровня
-	err = s.repo.UpdateUserProfileLevel(tx, userID, profileLevelID, newTotalXP)
+	_, maxXP, err := s.repo.GetProfileXPBounds(tx, profileLevelID)
 	if err != nil {
-		return fmt.Errorf("update user profile level: %w", err)
+		return fmt.Errorf("get profile level bounds: %w", err)
+	}
+
+	if newTotalXP >= maxXP {
+		if err := s.repo.LevelUpUser(tx, userID, newTotalXP); err != nil {
+			return fmt.Errorf("level up user: %w", err)
+		}
+	} else {
+		if err := s.repo.UpdateUserTotalXP(tx, userID, newTotalXP); err != nil {
+			return fmt.Errorf("update user xp: %w", err)
+		}
 	}
 
 	return nil
