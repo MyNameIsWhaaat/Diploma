@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/service"
 	"github.com/gin-gonic/gin"
+
+	"github.com/gin-contrib/cors"
 )
 
 type Handler struct {
@@ -15,6 +17,17 @@ func NewHandler(services *service.Service) *Handler{
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.RedirectTrailingSlash = false 
+
+	// CORS Middleware с разрешением всех источников
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	auth := router.Group("auth")
 	{
