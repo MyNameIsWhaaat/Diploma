@@ -118,31 +118,24 @@ func (r *Repository) LevelUpUser(tx *sqlx.Tx, userID int, newTotalXP int) error 
 	return err
 }
 
-// func (r *Repository) UpdateUserProfileLevel(tx *sqlx.Tx, userID, profileLevelID, newTotalXP int) error {
-// 	var minXP, maxXP int
-// 	err := tx.QueryRow(`
-// 		SELECT min_xp, max_xp FROM profile_levels WHERE id = $1
-// 	`, profileLevelID).Scan(&minXP, &maxXP)
-// 	if err != nil {
-// 		return err
-// 	}
+func (r *Repository) GetCourseLevelsForUser(userID, courseID int) ([]domain.LevelWithUserProgress, error) {
+	var levels []domain.LevelWithUserProgress
 
-// 	if newTotalXP >= maxXP {
-// 		_, err = tx.Exec(`
-// 			UPDATE user_profile_levels
-// 			SET profile_level_id = profile_level_id + 1,
-// 				total_xp = $1,
-// 				last_level_up = NOW(),
-// 				updated_at = NOW()
-// 			WHERE user_id = $2
-// 		`, newTotalXP, userID)
-// 	} else {
-// 		_, err = tx.Exec(`
-// 			UPDATE user_profile_levels
-// 			SET total_xp = $1,
-// 				updated_at = NOW()
-// 			WHERE user_id = $2
-// 		`, newTotalXP, userID)
-// 	}
-// 	return err
-// }
+	query := `
+	SELECT
+		l.id,
+		l.title,
+		ul.completed AS is_completed,
+		ul.is_current,
+		ul.xp_earned,
+		ul.started_at,
+		ul.completed_at
+	FROM levels l
+	LEFT JOIN user_levels ul ON ul.level_id = l.id AND ul.user_id = $1
+	WHERE l.course_id = $2
+	ORDER BY l.id;
+	`
+
+	err := r.db.Select(&levels, query, userID, courseID)
+	return levels, err
+}

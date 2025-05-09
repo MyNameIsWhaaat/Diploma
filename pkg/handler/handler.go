@@ -46,10 +46,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			levels := courses.Group("/:course_id/levels")
 			{
 				levels.GET("", h.getCourseLevels)
+				
 			}
+			courses.GET("/level/:id", h.getTasksByLevel)
 			courses.POST("/complete/level/:id", h.completeLevel)
 		}
-		
+		api.POST("/submitAnswer", h.submitAnswerHandler)
 	}
 
 	return router

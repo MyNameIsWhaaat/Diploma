@@ -14,7 +14,6 @@ type RepoInterface interface {
 	StartCourse(userID, courseID int) error
 
 	GetByCourse(courseID int) ([]domain.LevelFromCourse, error)
-
 	GetCourseIDAndXpReward(levelID int) (int, int, error)
 	BeginTx() (*sqlx.Tx, error)
 	IsUserEnrolledInCourse(tx *sqlx.Tx, userID, courseID int) (bool, error)
@@ -25,8 +24,12 @@ type RepoInterface interface {
 	GetProfileXPBounds(tx *sqlx.Tx, profileLevelID int) (minXP, maxXP int, err error)
 	UpdateUserTotalXP(tx *sqlx.Tx, userID int, totalXP int) error
 	LevelUpUser(tx *sqlx.Tx, userID int, newTotalXP int) error
-	// UpdateUserProfileLevel(tx *sqlx.Tx, userID, profileLevelID, newTotalXP int) error
+	GetCourseLevelsForUser(userID, courseID int) ([]domain.LevelWithUserProgress, error)
 
+	GetTasksByLevel(levelID int) ([]domain.Task, error)
+	GetTaskByID(taskID int) (domain.Task, error)
+	GetTaskVariants(taskID int) ([]domain.TaskVariant, error)
+	InsertOrUpdateProgress(progress domain.Progress) error
 }
 
 type Service struct {

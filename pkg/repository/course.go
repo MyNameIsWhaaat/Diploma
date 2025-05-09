@@ -36,6 +36,7 @@ func (r *Repository) GetCourseWithoutProgress(userId int) ([]domain.CourseWithou
 			id,
 			title,
 			short_description,
+			full_description,
 			image_url,
 			xp_reward
 		FROM courses

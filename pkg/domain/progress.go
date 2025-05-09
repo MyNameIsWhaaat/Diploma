@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"database/sql" 
+)
 
 type Progress struct {
 	ID          int        `db:"id"`
@@ -11,6 +13,6 @@ type Progress struct {
 	Attempts    int        `db:"attempts"`
 	XPEarned    int        `db:"xp_earned"`
 	TimeSpent   *int       `db:"time_spent"` // в секундах
-	CompletedAt time.Time `db:"completed_at"`
+	CompletedAt sql.NullTime `db:"completed_at"`
 	IsNeedsReview bool       `db:"needs_review"`
 }

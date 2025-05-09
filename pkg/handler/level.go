@@ -1,26 +1,65 @@
 package handler
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+type LevelWithUserProgressResponse struct {
+	ID          int        `json:"id"`
+	Title       string     `json:"title"`
+	IsCompleted bool       `json:"is_completed"`
+	IsCurrent   bool       `json:"is_current"`
+	XPEarned    int        `json:"xp_earned"`
+	StartedAt   *time.Time `json:"started_at,omitempty"`
+	CompletedAt *time.Time `json:"completed_at,omitempty"`
+}
 
 func (h *Handler) getCourseLevels(c *gin.Context) {
+
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	courseId, err := strconv.Atoi(c.Param("course_id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid course id")
 		return
 	}
 
-	levels, err := h.services.GetByCourse(courseId)
+	levels, err := h.services.GetCourseLevelsForUser(userId, courseId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, levels)
+	// Преобразуем в безопасный ответ
+	var response []LevelWithUserProgressResponse
+	for _, l := range levels {
+		response = append(response, LevelWithUserProgressResponse{
+			ID:          l.ID,
+			Title:       l.Title,
+			IsCompleted: l.IsCompleted.Valid && l.IsCompleted.Bool,
+			IsCurrent:   l.IsCurrent.Valid && l.IsCurrent.Bool,
+			XPEarned:    int(l.XPEarned.Int64),
+			StartedAt:   nullableTime(l.StartedAt),
+			CompletedAt: nullableTime(l.CompletedAt),
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func nullableTime(nt sql.NullTime) *time.Time {
+	if nt.Valid {
+		return &nt.Time
+	}
+	return nil
 }
 
 func (h *Handler) completeLevel(c *gin.Context) {
