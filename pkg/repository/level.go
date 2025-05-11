@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 	"github.com/jmoiron/sqlx"
@@ -138,4 +139,47 @@ func (r *Repository) GetCourseLevelsForUser(userID, courseID int) ([]domain.Leve
 
 	err := r.db.Select(&levels, query, userID, courseID)
 	return levels, err
+}
+
+func (r *Repository) IsLevelStarted(userID, levelID int) (bool, error) {
+	var exists bool
+	err := r.db.Get(&exists, `
+		SELECT EXISTS (
+			SELECT 1 FROM user_levels
+			WHERE user_id = $1 AND level_id = $2
+		)`, userID, levelID)
+	return exists, err
+}
+
+func (r *Repository) CreateUserLevel(userID, levelID int) error {
+	_, err := r.db.Exec(`
+		INSERT INTO user_levels (user_id, level_id, completed, is_current, xp_earned, started_at)
+		VALUES ($1, $2, false, true, 0, NOW())
+	`, userID, levelID)
+	return err
+}
+
+func (r *Repository) UpdateUserLevelCompletion(userID, levelID, xpEarned int, completedAt time.Time) error {
+	_, err := r.db.Exec(`
+		UPDATE user_levels
+		SET completed = true,
+		    is_current = false,
+		    xp_earned = $3,
+		    completed_at = $4
+		WHERE user_id = $1 AND level_id = $2
+	`, userID, levelID, xpEarned, completedAt)
+	return err
+}
+
+func (r *Repository) GetTaskProgress(userID, taskID int) (*domain.Progress, error) {
+	var progress domain.Progress
+	err := r.db.Get(&progress, `
+		SELECT * FROM progress
+		WHERE user_id = $1 AND task_id = $2
+	`, userID, taskID)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &progress, err
 }

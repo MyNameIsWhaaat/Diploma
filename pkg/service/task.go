@@ -120,3 +120,11 @@ func (s *Service) GetTasksByLevel(levelID int) ([]domain.Task, error){
 
 	return s.repo.GetTasksByLevel(levelID);
 }
+
+func (s *Service) GetTaskVariants(taskID int) ([]domain.TaskVariant, error){
+	if taskID <= 0 {
+		return nil, fmt.Errorf("invalid task ID: %d", taskID)
+	}
+
+	return s.repo.GetTaskVariants(taskID);
+}

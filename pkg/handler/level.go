@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,7 @@ func (h *Handler) getCourseLevels(c *gin.Context) {
 		return
 	}
 
-	levels, err := h.services.GetCourseLevelsForUser(userId, courseId)
+	levels, err := h.service.GetCourseLevelsForUser(userId, courseId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -79,7 +80,7 @@ func (h *Handler) completeLevel(c *gin.Context) {
 	}
 
 	// Попытка завершить уровень
-	err = h.services.CompleteLevel(userId, levelId)
+	err = h.service.CompleteLevel(userId, levelId)
 	if err != nil {
 		// Обработка ошибок бизнес-логики (например, уровень не найден, уже завершён, не принадлежит пользователю и т.п.)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -88,4 +89,38 @@ func (h *Handler) completeLevel(c *gin.Context) {
 
 	// Успешный ответ
 	c.JSON(http.StatusOK, statusResponse{Status: "OK"})
+}
+
+func (h *Handler) startLevel(c *gin.Context) {
+	// Получение ID пользователя из контекста
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	// Получение и валидация ID уровня из параметра URL
+	levelIdParam := c.Param("id")
+	levelId, err := strconv.Atoi(levelIdParam)
+	if err != nil || levelId <= 0 {
+		newErrorResponse(c, http.StatusBadRequest, "invalid level id")
+		return
+	}
+
+	// Попытка начать уровень
+	err = h.service.StartLevel(userId, levelId)
+	if err != nil {
+		switch {
+		case strings.Contains(err.Error(), "not enrolled"):
+			newErrorResponse(c, http.StatusForbidden, err.Error())
+		case strings.Contains(err.Error(), "already started"):
+			newErrorResponse(c, http.StatusConflict, err.Error())
+		default:
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	// Успешный ответ
+	c.JSON(http.StatusCreated, statusResponse{Status: "started"})
 }

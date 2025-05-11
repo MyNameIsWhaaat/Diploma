@@ -32,7 +32,7 @@ func (h *Handler) submitAnswerHandler(c *gin.Context) {
 		return
 	}
 
-	isCorrect, xp, err := h.services.SubmitAnswer(userId, req.TaskID, req.Answer)
+	isCorrect, xp, err := h.service.SubmitAnswer(userId, req.TaskID, req.Answer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("submit failed: %v", err)})
 		return
@@ -53,11 +53,28 @@ func (h *Handler) getTasksByLevel(c *gin.Context) {
 		return
 	}
 
-	tasks, err := h.services.GetTasksByLevel(levelId)
+	tasks, err := h.service.GetTasksByLevel(levelId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get tasks"})
 		return
 	}
 
 	c.JSON(http.StatusOK, tasks)
+}
+
+func (h *Handler) getTaskVariants(c *gin.Context) {
+	taskIDStr := c.Param("id")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task ID"})
+		return
+	}
+
+	variants, err := h.service.GetTaskVariants(taskID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch task variants"})
+		return
+	}
+
+	c.JSON(http.StatusOK, variants)
 }

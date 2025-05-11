@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 func (s *Service) CompleteLevel(userID, levelID int) error {
@@ -41,7 +42,31 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 		return errors.New("user is not enrolled in the course")
 	}
 
-	// Проверяем, завершил ли уже пользователь уровень
+	// // Проверяем, завершил ли уже пользователь уровень
+	// completed, err := s.repo.IsLevelCompletedByUser(tx, userID, levelID)
+	// if err != nil {
+	// 	return fmt.Errorf("check level completion: %w", err)
+	// }
+	// if completed {
+	// 	return errors.New("level already completed")
+	// }
+
+	// // Помечаем уровень как завершённый
+	// err = s.repo.MarkLevelAsCompleted(tx, userID, levelID)
+	// if err != nil {
+	// 	return fmt.Errorf("mark level as completed: %w", err)
+	// }
+
+	// Проверка: уровень начат
+	started, err := s.repo.IsLevelStarted(userID, levelID)
+	if err != nil {
+		return fmt.Errorf("check level start: %w", err)
+	}
+	if !started {
+		return errors.New("level not started")
+	}
+
+	// Проверка: не завершён ли уже
 	completed, err := s.repo.IsLevelCompletedByUser(tx, userID, levelID)
 	if err != nil {
 		return fmt.Errorf("check level completion: %w", err)
@@ -50,10 +75,29 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 		return errors.New("level already completed")
 	}
 
-	// Помечаем уровень как завершённый
-	err = s.repo.MarkLevelAsCompleted(tx, userID, levelID)
+	// Получаем задачи уровня
+	tasks, err := s.repo.GetTasksByLevel(levelID)
 	if err != nil {
-		return fmt.Errorf("mark level as completed: %w", err)
+		return fmt.Errorf("get tasks: %w", err)
+	}
+
+	// Проверка прогресса по задачам
+	totalXP := 0
+	for _, task := range tasks {
+		progress, err := s.repo.GetTaskProgress(userID, task.ID)
+		if err != nil {
+			return fmt.Errorf("get progress for task %d: %w", task.ID, err)
+		}
+		if progress == nil || !progress.IsCompleted {
+			return errors.New("not all tasks completed")
+		}
+		totalXP += progress.XPEarned
+	}
+
+	// Обновляем user_level
+	err = s.repo.UpdateUserLevelCompletion(userID, levelID, totalXP, time.Now())
+	if err != nil {
+		return fmt.Errorf("update user_level: %w", err)
 	}
 
 	// Обновляем XP в курсе
