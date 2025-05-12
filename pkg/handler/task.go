@@ -78,3 +78,26 @@ func (h *Handler) getTaskVariants(c *gin.Context) {
 
 	c.JSON(http.StatusOK, variants)
 }
+
+func (h *Handler) getReviewTasks(c *gin.Context) {
+	
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	levelIdParam := c.Param("level_id")
+	levelId, err := strconv.Atoi(levelIdParam)
+	if err != nil || levelId <= 0 {
+		newErrorResponse(c, http.StatusBadRequest, "invalid level id")
+		return
+	}
+	tasks, err := h.service.GetReviewTasks(userId, levelId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get tasks"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
+}

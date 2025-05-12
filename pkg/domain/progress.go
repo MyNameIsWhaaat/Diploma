@@ -9,6 +9,7 @@ type Progress struct {
 	UserID      int        `db:"user_id"`
 	TaskID      int        `db:"task_id"`
 	IsCompleted bool       `db:"is_completed"`
+	IsCurrent   bool       `db:"is_current"`
 	LastAnswer  *string    `db:"last_answer"`
 	Attempts    int        `db:"attempts"`
 	XPEarned    int        `db:"xp_earned"`

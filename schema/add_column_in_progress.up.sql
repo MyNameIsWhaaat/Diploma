@@ -1,0 +1,1 @@
+ALTER TABLE progress ADD COLUMN is_current BOOLEAN DEFAULT TRUE;

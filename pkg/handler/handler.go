@@ -27,6 +27,7 @@ type ServiceInterface interface {
 	StartLevel(userID, levelID int) error
 	GetUserProfileData(userID int) (domain.UserProfileData, error)
 	GetTaskVariants(taskID int) ([]domain.TaskVariant, error)
+	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
 }
 
 func NewHandler(service ServiceInterface) *Handler {
@@ -73,6 +74,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		tasks := api.Group("/tasks")
 		{
 			tasks.GET("/:id/variants", h.getTaskVariants)
+			tasks.GET("/review-tasks/:level_id", h.getReviewTasks)
 
 		}
 		api.POST("/submit_answer", h.submitAnswerHandler)

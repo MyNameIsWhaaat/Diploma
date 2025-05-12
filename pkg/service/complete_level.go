@@ -28,7 +28,7 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 	}()
 
 	// Получаем course_id и награду за уровень
-	courseID, xpReward, err := s.repo.GetCourseIDAndXpReward(levelID)
+	courseID, _, err := s.repo.GetCourseIDAndXpReward(levelID)
 	if err != nil {
 		return fmt.Errorf("get course and xp: %w", err)
 	}
@@ -41,21 +41,6 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 	if !enrolled {
 		return errors.New("user is not enrolled in the course")
 	}
-
-	// // Проверяем, завершил ли уже пользователь уровень
-	// completed, err := s.repo.IsLevelCompletedByUser(tx, userID, levelID)
-	// if err != nil {
-	// 	return fmt.Errorf("check level completion: %w", err)
-	// }
-	// if completed {
-	// 	return errors.New("level already completed")
-	// }
-
-	// // Помечаем уровень как завершённый
-	// err = s.repo.MarkLevelAsCompleted(tx, userID, levelID)
-	// if err != nil {
-	// 	return fmt.Errorf("mark level as completed: %w", err)
-	// }
 
 	// Проверка: уровень начат
 	started, err := s.repo.IsLevelStarted(userID, levelID)
@@ -81,6 +66,14 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 		return fmt.Errorf("get tasks: %w", err)
 	}
 
+	reviewTasks, err := s.repo.GetReviewTasks(userID, levelID)
+	if err != nil {
+		return fmt.Errorf("get review tasks: %w", err)
+	}
+	if len(reviewTasks) > 0 {
+		return errors.New("review tasks are not completed")
+	}
+
 	// Проверка прогресса по задачам
 	totalXP := 0
 	for _, task := range tasks {
@@ -88,10 +81,12 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 		if err != nil {
 			return fmt.Errorf("get progress for task %d: %w", task.ID, err)
 		}
-		if progress == nil || !progress.IsCompleted {
-			return errors.New("not all tasks completed")
+		if progress == nil || !progress.IsCompleted || !progress.IsCurrent {
+			return errors.New("not all tasks correctly completed")
 		}
-		totalXP += progress.XPEarned
+		if progress.IsCurrent {
+			totalXP += progress.XPEarned
+		}
 	}
 
 	// Обновляем user_level
@@ -101,19 +96,19 @@ func (s *Service) CompleteLevel(userID, levelID int) error {
 	}
 
 	// Обновляем XP в курсе
-	err = s.repo.UpdateXPInCourse(tx, userID, courseID, xpReward)
+	err = s.repo.UpdateXPInCourse(tx, userID, courseID, totalXP)
 	if err != nil {
 		return fmt.Errorf("update xp in course: %w", err)
 	}
 
 	// Получаем данные о профиле пользователя
-	profileLevelID, totalXP, err := s.repo.GetUserProfileLevelData(tx, userID)
+	profileLevelID, currentTotalXP, err := s.repo.GetUserProfileLevelData(tx, userID)
 	if err != nil {
 		return fmt.Errorf("get profile level data: %w", err)
 	}
 
 	// Считаем новое общее количество XP
-	newTotalXP := totalXP + xpReward
+	newTotalXP := currentTotalXP + totalXP
 
 	_, maxXP, err := s.repo.GetProfileXPBounds(tx, profileLevelID)
 	if err != nil {

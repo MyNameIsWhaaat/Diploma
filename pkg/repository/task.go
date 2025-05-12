@@ -59,26 +59,30 @@ func (r *Repository) GetCorrectChoiceManyVariantIDs(taskID int) ([]int, error) {
 
 func (r *Repository) InsertOrUpdateProgress(p domain.Progress) error {
 	query := `
-		INSERT INTO progress (user_id, task_id, is_completed, last_answer, xp_earned, completed_at, attempts)
-		VALUES ($1, $2, $3, $4, $5, $6, 1)
-		ON CONFLICT (user_id, task_id)
-		DO UPDATE SET
+		INSERT INTO progress (user_id, task_id, is_completed, is_current, last_answer, attempts, xp_earned, time_spent, completed_at)
+		VALUES (:user_id, :task_id, :is_completed, :is_current, :last_answer, 1, :xp_earned, :time_spent, :completed_at)
+		ON CONFLICT (user_id, task_id) DO UPDATE
+		SET 
 			is_completed = EXCLUDED.is_completed,
+			is_current = EXCLUDED.is_current,
 			last_answer = EXCLUDED.last_answer,
-			xp_earned = EXCLUDED.xp_earned,
 			attempts = progress.attempts + 1,
-			completed_at = CASE
-				WHEN EXCLUDED.is_completed THEN EXCLUDED.completed_at
-				ELSE progress.completed_at
-			END
+			xp_earned = EXCLUDED.xp_earned,
+			time_spent = EXCLUDED.time_spent,
+			completed_at = EXCLUDED.completed_at
 	`
-	_, err := r.db.Exec(query,
-		p.UserID,
-		p.TaskID,
-		p.IsCompleted,
-		p.LastAnswer,
-		p.XPEarned,
-		p.CompletedAt.Time,
-	)
+	_, err := r.db.NamedExec(query, p)
 	return err
+}
+
+func (r *Repository) GetReviewTasks(userID, levelID int) ([]domain.Task, error) {
+	query := `
+		SELECT t.*
+		FROM tasks t
+		JOIN progress p ON t.id = p.task_id
+		WHERE p.user_id = $1 AND t.level_id = $2 AND p.is_current = false
+	`
+	var tasks []domain.Task
+	err := r.db.Select(&tasks, query, userID, levelID)
+	return tasks, err
 }

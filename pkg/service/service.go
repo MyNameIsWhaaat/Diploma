@@ -37,6 +37,7 @@ type RepoInterface interface {
 	GetTaskByID(taskID int) (domain.Task, error)
 	GetTaskVariants(taskID int) ([]domain.TaskVariant, error)
 	InsertOrUpdateProgress(progress domain.Progress) error
+	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
 
 	//
 	IsLevelStarted(userID, levelID int) (bool, error)

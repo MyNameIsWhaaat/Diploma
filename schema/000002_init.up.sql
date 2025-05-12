@@ -18,6 +18,6 @@ VALUES (1, 'choice_one', 'Выбери правильный вариант', 10)
 
 INSERT INTO task_variants (task_id, content, is_correct)
 VALUES 
-(2, 'Неправильно', false),
-(2, 'Правильно', true),
-(2, 'Тоже мимо', false);
+(6, 'Неправильно', false),
+(6, 'Правильно', true),
+(6, 'Тоже мимо', false);
