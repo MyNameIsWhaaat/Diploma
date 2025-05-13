@@ -5,7 +5,7 @@ import "github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
 func (r *Repository) GetUserProfileData(userID int) (domain.UserProfileData, error) {
 	query := `
 		SELECT 
-			u.id, u.username, u.email, u.avatar_url,
+			u.id, u.name, u.username, u.email, u.avatar_url,
 			pl.title AS profile_level,
 			upl.total_xp
 		FROM users u

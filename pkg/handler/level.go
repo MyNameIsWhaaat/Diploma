@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
 type LevelWithUserProgressResponse struct {
 	ID          int        `json:"id"`
 	Title       string     `json:"title"`
@@ -17,6 +18,8 @@ type LevelWithUserProgressResponse struct {
 	XPEarned    int        `json:"xp_earned"`
 	StartedAt   *time.Time `json:"started_at,omitempty"`
 	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	OrderIndex  int        `db:"order_index" json:"order_index"`
+	IsUnlocked  bool       `json:"is_unlocked"`
 }
 
 func (h *Handler) getCourseLevels(c *gin.Context) {
@@ -41,8 +44,9 @@ func (h *Handler) getCourseLevels(c *gin.Context) {
 
 	// Преобразуем в безопасный ответ
 	var response []LevelWithUserProgressResponse
+	unlocked := true
 	for _, l := range levels {
-		response = append(response, LevelWithUserProgressResponse{
+		resp := LevelWithUserProgressResponse{
 			ID:          l.ID,
 			Title:       l.Title,
 			IsCompleted: l.IsCompleted.Valid && l.IsCompleted.Bool,
@@ -50,7 +54,14 @@ func (h *Handler) getCourseLevels(c *gin.Context) {
 			XPEarned:    int(l.XPEarned.Int64),
 			StartedAt:   nullableTime(l.StartedAt),
 			CompletedAt: nullableTime(l.CompletedAt),
-		})
+			OrderIndex:  l.OrderIndex,
+			IsUnlocked:  unlocked,
+		}
+		response = append(response, resp)
+
+		if !resp.IsCompleted {
+			unlocked = false
+		}
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -80,15 +91,13 @@ func (h *Handler) completeLevel(c *gin.Context) {
 	}
 
 	// Попытка завершить уровень
-	err = h.service.CompleteLevel(userId, levelId)
+	result, err := h.service.CompleteLevel(userId, levelId)
 	if err != nil {
-		// Обработка ошибок бизнес-логики (например, уровень не найден, уже завершён, не принадлежит пользователю и т.п.)
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Успешный ответ
-	c.JSON(http.StatusOK, statusResponse{Status: "OK"})
+	c.JSON(http.StatusOK, result)
 }
 
 func (h *Handler) startLevel(c *gin.Context) {
@@ -123,4 +132,25 @@ func (h *Handler) startLevel(c *gin.Context) {
 
 	// Успешный ответ
 	c.JSON(http.StatusCreated, statusResponse{Status: "started"})
+}
+
+func (h *Handler) getLevelsWithAccess(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	courseID, err := strconv.Atoi(c.Param("course_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid course ID"})
+		return
+	}
+
+	levels, err := h.service.GetLevelsWithAccess(userId, courseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get levels"})
+		return
+	}
+
+	c.JSON(http.StatusOK, levels)
 }

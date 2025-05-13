@@ -240,3 +240,14 @@ func (s *Service) GetReviewTasks(userID, levelID int) ([]domain.Task, error){
 
 	return s.repo.GetReviewTasks(userID, levelID)
 }
+
+func (s *Service) CountMistakes(userID, levelID int) (int, error){
+	if levelID <= 0 {
+		return 0, fmt.Errorf("invalid level ID: %d", levelID)
+	}
+	if userID <= 0 {
+		return 0, fmt.Errorf("invalid level ID: %d", userID)
+	}
+
+	return s.repo.CountMistakes(userID, levelID)
+}

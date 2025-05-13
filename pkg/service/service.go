@@ -31,6 +31,7 @@ type RepoInterface interface {
 	UpdateUserTotalXP(tx *sqlx.Tx, userID int, totalXP int) error
 	LevelUpUser(tx *sqlx.Tx, userID int, newTotalXP int) error
 	GetCourseLevelsForUser(userID, courseID int) ([]domain.LevelWithUserProgress, error)
+	GetCompletedLevelIDs(userID int) ([]int, error)
 
 	//Задачи
 	GetTasksByLevel(levelID int) ([]domain.Task, error)
@@ -38,6 +39,7 @@ type RepoInterface interface {
 	GetTaskVariants(taskID int) ([]domain.TaskVariant, error)
 	InsertOrUpdateProgress(progress domain.Progress) error
 	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
+	CountMistakes(userID, levelID int) (int, error)
 
 	//
 	IsLevelStarted(userID, levelID int) (bool, error)

@@ -20,7 +20,7 @@ type ServiceInterface interface {
 	GetCourseWithoutProgress(userId int) ([]domain.CourseWithoutProgress, error)
 	GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error)
 	StartCourse(userID, courseID int) error
-	CompleteLevel(userID, levelID int) error
+	CompleteLevel(userID, levelID int) (*domain.LevelResult, error)
 	GetCourseLevelsForUser(userID, courseID int) ([]domain.LevelWithUserProgress, error)
 	GetTasksByLevel(levelID int) ([]domain.Task, error)
 	ParseToken(accessToken string) (int, error)
@@ -28,6 +28,8 @@ type ServiceInterface interface {
 	GetUserProfileData(userID int) (domain.UserProfileData, error)
 	GetTaskVariants(taskID int) ([]domain.TaskVariant, error)
 	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
+	
+	GetLevelsWithAccess(userID, courseID int) ([]domain.LevelWithAccess, error)
 }
 
 func NewHandler(service ServiceInterface) *Handler {
@@ -65,6 +67,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			levels := courses.Group("/:course_id/levels")
 			{
 				levels.GET("", h.getCourseLevels)
+				levels.GET("/levels-with-access", h.getLevelsWithAccess)
 
 			}
 			courses.GET("/level/:id/tasks", h.getTasksByLevel)

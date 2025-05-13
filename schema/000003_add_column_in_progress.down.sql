@@ -1,0 +1,1 @@
+ALTER TABLE progress DROP COLUMN is_current;

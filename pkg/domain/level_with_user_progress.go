@@ -12,4 +12,6 @@ type LevelWithUserProgress struct {
 	XPEarned    sql.NullInt64 `db:"xp_earned"`
 	StartedAt   sql.NullTime  `db:"started_at"`
 	CompletedAt sql.NullTime  `db:"completed_at"`
+	OrderIndex  int       `db:"order_index" json:"order_index"`
+	IsUnlocked bool `json:"is_unlocked"`  
 }

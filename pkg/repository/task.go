@@ -86,3 +86,15 @@ func (r *Repository) GetReviewTasks(userID, levelID int) ([]domain.Task, error) 
 	err := r.db.Select(&tasks, query, userID, levelID)
 	return tasks, err
 }
+
+func (r *Repository) CountMistakes(userID, levelID int) (int, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM progress p
+		JOIN tasks t ON p.task_id = t.id
+		WHERE p.user_id = $1 AND t.level_id = $2 AND p.attempts > 1
+	`
+	var count int
+	err := r.db.Get(&count, query, userID, levelID)
+	return count, err
+}

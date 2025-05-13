@@ -130,7 +130,8 @@ func (r *Repository) GetCourseLevelsForUser(userID, courseID int) ([]domain.Leve
 		ul.is_current,
 		ul.xp_earned,
 		ul.started_at,
-		ul.completed_at
+		ul.completed_at,
+		l.order_index
 	FROM levels l
 	LEFT JOIN user_levels ul ON ul.level_id = l.id AND ul.user_id = $1
 	WHERE l.course_id = $2
@@ -182,4 +183,11 @@ func (r *Repository) GetTaskProgress(userID, taskID int) (*domain.Progress, erro
 		return nil, nil
 	}
 	return &progress, err
+}
+
+func (r *Repository) GetCompletedLevelIDs(userID int) ([]int, error) {
+	query := `SELECT level_id FROM user_levels WHERE user_id = $1 AND completed_at IS NOT NULL`
+	var ids []int
+	err := r.db.Select(&ids, query, userID)
+	return ids, err
 }
