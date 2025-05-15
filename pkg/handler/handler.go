@@ -28,7 +28,7 @@ type ServiceInterface interface {
 	GetUserProfileData(userID int) (domain.UserProfileData, error)
 	GetTaskVariants(taskID int) ([]domain.TaskVariant, error)
 	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
-	
+	MarkUserNotNew(userID int) error
 	GetLevelsWithAccess(userID, courseID int) ([]domain.LevelWithAccess, error)
 }
 
@@ -74,14 +74,21 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			courses.POST("/level/:id/start", h.startLevel)
 			courses.POST("/complete/level/:id", h.completeLevel)
 		}
+
 		tasks := api.Group("/tasks")
 		{
 			tasks.GET("/:id/variants", h.getTaskVariants)
 			tasks.GET("/review-tasks/:level_id", h.getReviewTasks)
 
 		}
+
 		api.POST("/submit_answer", h.submitAnswerHandler)
 		api.GET("/user/me", h.getUserProfileData)
+
+		userGroup := router.Group("/api/user", h.userIdentity)
+		{
+			userGroup.POST("/mark-not-new", h.setUserNotNew)
+		}
 	}
 
 	return router

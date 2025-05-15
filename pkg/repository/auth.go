@@ -8,9 +8,9 @@ import (
 
 // CreateUser создает пользователя, возвращает его идентификатор.
 func (r *Repository) CreateUser(user domain.User) (int, error) {
-	const query = `INSERT INTO users (name, username, password_hash) values ($1, $2, $3) RETURNING id`
+	const query = `INSERT INTO users (name, username, email, avatar_url, password_hash, is_new_user) values ($1, $2, $3, $4, $5, $6) RETURNING id`
 
-	row := r.db.QueryRow(query, user.Name, user.Username, user.Password)
+	row := r.db.QueryRow(query, user.Name, user.Username, user.Email, "0", user.Password, true)
 
 	var userID int
 	if err := row.Scan(&userID); err != nil {

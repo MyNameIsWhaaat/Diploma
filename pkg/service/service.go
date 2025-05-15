@@ -12,6 +12,7 @@ type RepoInterface interface {
 	CreateUser(user domain.User) (int, error)
 	GetUser(username, password string) (domain.User, error)
 	GetUserProfileData(userID int) (domain.UserProfileData, error)
+	UpdateUserIsNewFlag(userID int, isNew bool) error
 
 	//Курсы
 	GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error)
