@@ -191,3 +191,17 @@ func (r *Repository) GetCompletedLevelIDs(userID int) ([]int, error) {
 	err := r.db.Select(&ids, query, userID)
 	return ids, err
 }
+
+func (r *Repository) GetTheoryBlocksByLevel(levelID int) ([]domain.TheoryBlock, error) {
+	var blocks []domain.TheoryBlock
+
+	query := `
+	SELECT id, level_id, title, content, order_index
+	FROM theory_blocks
+	WHERE level_id = $1
+	ORDER BY order_index;
+	`
+
+	err := r.db.Select(&blocks, query, levelID)
+	return blocks, err
+}

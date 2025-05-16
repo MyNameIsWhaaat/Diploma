@@ -48,3 +48,22 @@ INSERT INTO levels (course_id, title, description, order_index, xp_reward) VALUE
 (3, 'Сравнение алгоритмов', 'Когда что использовать: скорость, стабильность, ресурсы.', 3, 50),
 (3, 'Сортировка по ключу', 'Сортируем не только числа — работа с объектами и структурами.', 4, 50),
 (3, 'Практика и оптимизация', 'Оптимизируем сортировки и применяем на практике.', 5, 50);
+
+INSERT INTO tasks (level_id, type, question, xp_reward)
+VALUES (16, 'choice_one', 'Что из перечисленного НЕ является алгоритмом?', 20);
+
+INSERT INTO task_variants (task_id, content, is_correct) VALUES
+(8, 'Рецепт приготовления пирога', false),
+(8, 'Инструкция по сборке мебели', false),
+(8, 'Перечень любимых книг', true),
+(8, 'План эвакуации при пожаре', false);
+
+INSERT INTO tasks (level_id, type, question, xp_reward)
+VALUES (16, 'choice_one', 'Что делает алгоритм?', 20);
+
+-- допустим, task_id = 9
+INSERT INTO task_variants (task_id, content, is_correct) VALUES
+(9, 'Создаёт случайные события', false),
+(9, 'Даёт последовательные шаги для достижения цели', true),
+(9, 'Хранит данные в памяти', false),
+(9, 'Управляет компьютером напрямую', false);

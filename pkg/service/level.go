@@ -68,3 +68,10 @@ func (s *Service) GetLevelsWithAccess(userID, courseID int) ([]domain.LevelWithA
 
 	return result, nil
 }
+
+func (s *Service) GetTheoryByLevel(levelID int) ([]domain.TheoryBlock, error) {
+	if levelID <= 0 {
+		return nil, fmt.Errorf("invalid level ID: %d", levelID)
+	}
+	return s.repo.GetTheoryBlocksByLevel(levelID)
+}

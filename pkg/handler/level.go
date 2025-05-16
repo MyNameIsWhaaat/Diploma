@@ -154,3 +154,19 @@ func (h *Handler) getLevelsWithAccess(c *gin.Context) {
 
 	c.JSON(http.StatusOK, levels)
 }
+
+func (h *Handler) getLevelTheory(c *gin.Context) {
+	levelID, err := strconv.Atoi(c.Param("level_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid level id"})
+		return
+	}
+
+	blocks, err := h.service.GetTheoryByLevel(levelID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, blocks)
+}

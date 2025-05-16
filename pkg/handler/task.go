@@ -101,3 +101,20 @@ func (h *Handler) getReviewTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, tasks)
 }
+
+func (h *Handler) getMatchPairs(c *gin.Context) {
+	taskIDParam := c.Param("id")
+	taskID, err := strconv.Atoi(taskIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task id"})
+		return
+	}
+
+	pairs, err := h.service.GetMatchPairsByTaskID(taskID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get match pairs"})
+		return
+	}
+
+	c.JSON(http.StatusOK, pairs)
+}

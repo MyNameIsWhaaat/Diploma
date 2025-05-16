@@ -98,3 +98,16 @@ func (r *Repository) CountMistakes(userID, levelID int) (int, error) {
 	err := r.db.Get(&count, query, userID, levelID)
 	return count, err
 }
+
+func (r *Repository) GetMatchPairsByTaskID(taskID int) ([]domain.TaskMatchPairs, error) {
+	var pairs []domain.TaskMatchPairs
+
+	query := `
+		SELECT id, task_id, left_text, right_text, match_key
+		FROM task_match_pairs
+		WHERE task_id = $1
+	`
+
+	err := r.db.Select(&pairs, query, taskID)
+	return pairs, err
+}

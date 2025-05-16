@@ -30,6 +30,8 @@ type ServiceInterface interface {
 	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
 	MarkUserNotNew(userID int) error
 	GetLevelsWithAccess(userID, courseID int) ([]domain.LevelWithAccess, error)
+	GetTheoryByLevel(levelID int) ([]domain.TheoryBlock, error)
+	GetMatchPairsByTaskID(taskID int) ([]domain.TaskMatchPairs, error)
 }
 
 func NewHandler(service ServiceInterface) *Handler {
@@ -78,17 +80,25 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		tasks := api.Group("/tasks")
 		{
 			tasks.GET("/:id/variants", h.getTaskVariants)
+			tasks.GET("/:id/match-pairs", h.getMatchPairs)
 			tasks.GET("/review-tasks/:level_id", h.getReviewTasks)
 
 		}
 
+		theory := api.Group("/levels/:level_id/theory")
+		{
+			theory.GET("", h.getLevelTheory)
+		}
+
 		api.POST("/submit_answer", h.submitAnswerHandler)
 		api.GET("/user/me", h.getUserProfileData)
+		
 
 		userGroup := router.Group("/api/user", h.userIdentity)
 		{
 			userGroup.POST("/mark-not-new", h.setUserNotNew)
 		}
+
 	}
 
 	return router
