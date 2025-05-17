@@ -68,8 +68,8 @@ func (s *Service) SubmitAnswer(userID, taskID int, rawAnswer interface{}) (bool,
 			isCorrect = equalIntSlices(answers, correctIDs)
 		}
 	case domain.TaskTypeMatch:
-	// Пример ожидаемого формата: map[string]string, где ключи и значения — строки
-	answerMap, ok := rawAnswer.(map[string]interface{})
+	// Пример ожидаемого формата: []string, где каждая строка — "ключ : значение"
+	rawList, ok := rawAnswer.([]interface{})
 	if !ok {
 		return false, 0, errors.New("invalid match answer format")
 	}
@@ -79,22 +79,38 @@ func (s *Service) SubmitAnswer(userID, taskID int, rawAnswer interface{}) (bool,
 	if err != nil {
 		return false, 0, fmt.Errorf("get match pairs: %w", err)
 	}
+	for _, p := range pairs {
+    fmt.Println(p.LeftText, "→", p.RightText)
+}
 
-	// Преобразуем пары в map по ключам
+	// Собираем ожидаемую map[LeftText]RightText
 	expected := make(map[string]string)
 	for _, p := range pairs {
-		expected[p.LeftText] = p.MatchKey
+		expected[p.LeftText] = p.RightText // теперь сравнение по RightText, не MatchKey
 	}
 
-	// Проверка
+	// Разбираем входящие строки в map
+	answerMap := make(map[string]string)
+	for _, item := range rawList {
+		s, ok := item.(string)
+		if !ok {
+			return false, 0, errors.New("match answer should be strings")
+		}
+
+		parts := strings.SplitN(s, ":", 2)
+		if len(parts) != 2 {
+			return false, 0, errors.New("invalid pair format (expected 'left : right')")
+		}
+
+		left := strings.TrimSpace(parts[0])
+		right := strings.TrimSpace(parts[1])
+		answerMap[left] = right
+	}
+
+	// Сравниваем
 	isCorrect = true
 	for key, expectedValue := range expected {
-		userValueRaw, ok := answerMap[key]
-		if !ok {
-			isCorrect = false
-			break
-		}
-		userValue, ok := userValueRaw.(string)
+		userValue, ok := answerMap[key]
 		if !ok || userValue != expectedValue {
 			isCorrect = false
 			break
