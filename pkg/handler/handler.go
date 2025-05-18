@@ -1,8 +1,9 @@
 package handler
 
 import (
+	"context"
+
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/domain"
-	//"github.com/MyNameIsWhaaat/algo-learning/pkg/service"
 	"github.com/gin-gonic/gin"
 
 	"github.com/gin-contrib/cors"
@@ -32,6 +33,7 @@ type ServiceInterface interface {
 	GetLevelsWithAccess(userID, courseID int) ([]domain.LevelWithAccess, error)
 	GetTheoryByLevel(levelID int) ([]domain.TheoryBlock, error)
 	GetMatchPairsByTaskID(taskID int) ([]domain.TaskMatchPairs, error)
+	CheckUserCode(ctx context.Context, userID, taskID int, userCode string) (*domain.CodeCheckResult, error)
 }
 
 func NewHandler(service ServiceInterface) *Handler {
@@ -92,6 +94,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		api.POST("/submit_answer", h.submitAnswerHandler)
 		api.GET("/user/me", h.getUserProfileData)
+		api.POST("/code/submit", h.submitCodeHandler)
 		
 
 		userGroup := router.Group("/api/user", h.userIdentity)

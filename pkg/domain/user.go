@@ -13,5 +13,5 @@ type User struct {
 	IsActive  bool      `db:"is_active"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
-	IsNewUser bool 		`db:"is_new_user"`
+	IsNewUser bool      `db:"is_new_user"`
 }

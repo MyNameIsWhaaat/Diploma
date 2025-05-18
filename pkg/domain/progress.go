@@ -1,19 +1,19 @@
 package domain
 
 import (
-	"database/sql" 
+	"database/sql"
 )
 
 type Progress struct {
-	ID          int        `db:"id"`
-	UserID      int        `db:"user_id"`
-	TaskID      int        `db:"task_id"`
-	IsCompleted bool       `db:"is_completed"`
-	IsCurrent   bool       `db:"is_current"`
-	LastAnswer  *string    `db:"last_answer"`
-	Attempts    int        `db:"attempts"`
-	XPEarned    int        `db:"xp_earned"`
-	TimeSpent   *int       `db:"time_spent"` // в секундах
-	CompletedAt sql.NullTime `db:"completed_at"`
-	IsNeedsReview bool       `db:"needs_review"`
+	ID            int          `db:"id"`
+	UserID        int          `db:"user_id"`
+	TaskID        int          `db:"task_id"`
+	IsCompleted   bool         `db:"is_completed"`
+	IsCurrent     bool         `db:"is_current"`
+	LastAnswer    *string      `db:"last_answer"`
+	Attempts      int          `db:"attempts"`
+	XPEarned      int          `db:"xp_earned"`
+	TimeSpent     *int         `db:"time_spent"` // в секундах
+	CompletedAt   sql.NullTime `db:"completed_at"`
+	IsNeedsReview bool         `db:"needs_review"`
 }

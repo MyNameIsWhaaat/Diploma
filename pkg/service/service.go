@@ -18,7 +18,7 @@ type RepoInterface interface {
 	GetCourseWithProgress(userId int) ([]domain.CourseWithProgress, error)
 	GetCourseWithoutProgress(userId int) ([]domain.CourseWithoutProgress, error)
 	StartCourse(userID, courseID int) error
-	
+
 	//Уровни
 	GetByCourse(courseID int) ([]domain.LevelFromCourse, error)
 	GetCourseIDAndXpReward(levelID int) (int, int, error)
@@ -43,13 +43,14 @@ type RepoInterface interface {
 	GetReviewTasks(userID, levelID int) ([]domain.Task, error)
 	CountMistakes(userID, levelID int) (int, error)
 	GetMatchPairsByTaskID(taskID int) ([]domain.TaskMatchPairs, error)
-	
+	GetCodeTaskByTaskID(taskID int) (*domain.CodeTask, error)
+	SaveCodeAttempt(userID, taskID int, code string, isCorrect bool, passed, total int) error
+
 	//
 	IsLevelStarted(userID, levelID int) (bool, error)
 	CreateUserLevel(userID, levelID int) error
 	UpdateUserLevelCompletion(userID, levelID, xpEarned int, completedAt time.Time) error
 	GetTaskProgress(userID, taskID int) (*domain.Progress, error)
-
 }
 
 type Service struct {

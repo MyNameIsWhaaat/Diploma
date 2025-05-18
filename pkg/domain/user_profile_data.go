@@ -8,5 +8,5 @@ type UserProfileData struct {
 	AvatarURL    string `json:"avatar_url" db:"avatar_url"`
 	ProfileLevel string `json:"profile_level" db:"profile_level"`
 	TotalXP      int    `json:"total_xp" db:"total_xp"`
-	IsNewUser 	 bool 	`db:"is_new_user"`
+	IsNewUser    bool   `db:"is_new_user"`
 }

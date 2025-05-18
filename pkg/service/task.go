@@ -68,54 +68,54 @@ func (s *Service) SubmitAnswer(userID, taskID int, rawAnswer interface{}) (bool,
 			isCorrect = equalIntSlices(answers, correctIDs)
 		}
 	case domain.TaskTypeMatch:
-	// Пример ожидаемого формата: []string, где каждая строка — "ключ : значение"
-	rawList, ok := rawAnswer.([]interface{})
-	if !ok {
-		return false, 0, errors.New("invalid match answer format")
-	}
-
-	// Получаем пары из БД
-	pairs, err := s.repo.GetMatchPairsByTaskID(taskID)
-	if err != nil {
-		return false, 0, fmt.Errorf("get match pairs: %w", err)
-	}
-	for _, p := range pairs {
-    fmt.Println(p.LeftText, "→", p.RightText)
-}
-
-	// Собираем ожидаемую map[LeftText]RightText
-	expected := make(map[string]string)
-	for _, p := range pairs {
-		expected[p.LeftText] = p.RightText // теперь сравнение по RightText, не MatchKey
-	}
-
-	// Разбираем входящие строки в map
-	answerMap := make(map[string]string)
-	for _, item := range rawList {
-		s, ok := item.(string)
+		// Пример ожидаемого формата: []string, где каждая строка — "ключ : значение"
+		rawList, ok := rawAnswer.([]interface{})
 		if !ok {
-			return false, 0, errors.New("match answer should be strings")
+			return false, 0, errors.New("invalid match answer format")
 		}
 
-		parts := strings.SplitN(s, ":", 2)
-		if len(parts) != 2 {
-			return false, 0, errors.New("invalid pair format (expected 'left : right')")
+		// Получаем пары из БД
+		pairs, err := s.repo.GetMatchPairsByTaskID(taskID)
+		if err != nil {
+			return false, 0, fmt.Errorf("get match pairs: %w", err)
+		}
+		for _, p := range pairs {
+			fmt.Println(p.LeftText, "→", p.RightText)
 		}
 
-		left := strings.TrimSpace(parts[0])
-		right := strings.TrimSpace(parts[1])
-		answerMap[left] = right
-	}
-
-	// Сравниваем
-	isCorrect = true
-	for key, expectedValue := range expected {
-		userValue, ok := answerMap[key]
-		if !ok || userValue != expectedValue {
-			isCorrect = false
-			break
+		// Собираем ожидаемую map[LeftText]RightText
+		expected := make(map[string]string)
+		for _, p := range pairs {
+			expected[p.LeftText] = p.RightText // теперь сравнение по RightText, не MatchKey
 		}
-	}
+
+		// Разбираем входящие строки в map
+		answerMap := make(map[string]string)
+		for _, item := range rawList {
+			s, ok := item.(string)
+			if !ok {
+				return false, 0, errors.New("match answer should be strings")
+			}
+
+			parts := strings.SplitN(s, ":", 2)
+			if len(parts) != 2 {
+				return false, 0, errors.New("invalid pair format (expected 'left : right')")
+			}
+
+			left := strings.TrimSpace(parts[0])
+			right := strings.TrimSpace(parts[1])
+			answerMap[left] = right
+		}
+
+		// Сравниваем
+		isCorrect = true
+		for key, expectedValue := range expected {
+			userValue, ok := answerMap[key]
+			if !ok || userValue != expectedValue {
+				isCorrect = false
+				break
+			}
+		}
 	default:
 		return false, 0, fmt.Errorf("unsupported task type: %s", task.Type)
 	}
@@ -153,7 +153,6 @@ func (s *Service) SubmitAnswer(userID, taskID int, rawAnswer interface{}) (bool,
 	return isCorrect, xp, nil
 }
 
-
 // normalize сравнивает input без учёта регистра и пробелов
 func normalize(s string) string {
 	return strings.ToLower(strings.TrimSpace(s))
@@ -174,7 +173,7 @@ func equalIntSlices(a, b []int) bool {
 	return true
 }
 
-func (s *Service) GetTasksByLevel(levelID int) ([]domain.Task, error){
+func (s *Service) GetTasksByLevel(levelID int) ([]domain.Task, error) {
 	if levelID <= 0 {
 		return nil, fmt.Errorf("invalid level ID: %d", levelID)
 	}
@@ -182,7 +181,7 @@ func (s *Service) GetTasksByLevel(levelID int) ([]domain.Task, error){
 	return s.repo.GetTasksByLevel(levelID)
 }
 
-func (s *Service) GetTaskVariants(taskID int) ([]domain.TaskVariant, error){
+func (s *Service) GetTaskVariants(taskID int) ([]domain.TaskVariant, error) {
 	if taskID <= 0 {
 		return nil, fmt.Errorf("invalid task ID: %d", taskID)
 	}
@@ -190,7 +189,7 @@ func (s *Service) GetTaskVariants(taskID int) ([]domain.TaskVariant, error){
 	return s.repo.GetTaskVariants(taskID)
 }
 
-func (s *Service) GetReviewTasks(userID, levelID int) ([]domain.Task, error){
+func (s *Service) GetReviewTasks(userID, levelID int) ([]domain.Task, error) {
 	if levelID <= 0 {
 		return nil, fmt.Errorf("invalid level ID: %d", levelID)
 	}
@@ -201,7 +200,7 @@ func (s *Service) GetReviewTasks(userID, levelID int) ([]domain.Task, error){
 	return s.repo.GetReviewTasks(userID, levelID)
 }
 
-func (s *Service) CountMistakes(userID, levelID int) (int, error){
+func (s *Service) CountMistakes(userID, levelID int) (int, error) {
 	if levelID <= 0 {
 		return 0, fmt.Errorf("invalid level ID: %d", levelID)
 	}

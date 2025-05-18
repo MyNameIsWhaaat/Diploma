@@ -111,3 +111,32 @@ func (r *Repository) GetMatchPairsByTaskID(taskID int) ([]domain.TaskMatchPairs,
 	err := r.db.Select(&pairs, query, taskID)
 	return pairs, err
 }
+
+func (r *Repository) GetCodeTaskByTaskID(taskID int) (*domain.CodeTask, error) {
+	var ct domain.CodeTask
+	err := r.db.QueryRow(`
+		SELECT function_name, language, tests, default_code, hint, max_execution_time_ms
+		FROM code_tasks
+		WHERE task_id = $1
+	`, taskID).Scan(
+		&ct.FunctionName,
+		&ct.Language,
+		&ct.Tests,
+		&ct.DefaultCode,
+		&ct.Hint,
+		&ct.MaxExecutionTimeMS,
+	)
+	if err != nil {
+		return nil, err
+	}
+	ct.TaskID = taskID
+	return &ct, nil
+}
+
+func (r *Repository) SaveCodeAttempt(userID, taskID int, code string, isCorrect bool, passed, total int) error {
+	_, err := r.db.Exec(`
+		INSERT INTO code_task_attempts (user_id, task_id, code_submitted, is_correct, passed, total, submitted_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW())
+	`, userID, taskID, code, isCorrect, passed, total)
+	return err
+}
