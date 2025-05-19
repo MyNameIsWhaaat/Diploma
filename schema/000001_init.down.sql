@@ -1,1 +1,10 @@
-DROP TABLE users;
+DROP TABLE IF EXISTS progress;
+DROP TABLE IF EXISTS task_variants;
+DROP TABLE IF EXISTS tasks;
+DROP TABLE IF EXISTS user_levels;
+DROP TABLE IF EXISTS user_courses;
+DROP TABLE IF EXISTS levels;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS user_profile_levels;
+DROP TABLE IF EXISTS profile_levels;
+DROP TABLE IF EXISTS users;

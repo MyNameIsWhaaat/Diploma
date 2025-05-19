@@ -3,9 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/MyNameIsWhaaat/algo-learning"
+	"github.com/MyNameIsWhaaat/algo-learning/config"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/handler"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/repository"
+	"github.com/MyNameIsWhaaat/algo-learning/pkg/server"
 	"github.com/MyNameIsWhaaat/algo-learning/pkg/service"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -24,7 +25,7 @@ func main() {
 		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgresDB(repository.Config{
+	db, err := config.NewPostgresDB(config.Config{
 		Host: viper.GetString("db.host"),
 		Port: viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -37,11 +38,11 @@ func main() {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	repos:= repository.NewRepository(db)
-	services:= service.NewService(repos)
+	repos := repository.NewRepository(db)
+	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	srv := new(algolearning.Server)
+	srv := new(server.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil{
 		logrus.Fatalf("error occures while running http server: %s", err.Error())
 	}

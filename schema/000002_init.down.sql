@@ -1,0 +1,4 @@
+ALTER TABLE tasks
+ALTER COLUMN type TYPE VARCHAR(50);
+
+DROP TYPE task_type;

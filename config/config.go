@@ -1,12 +1,9 @@
-package repository
+package config
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
-)
 
-const (
-	usersTable       = "users"
+	"github.com/jmoiron/sqlx"
 )
 
 type Config struct {
